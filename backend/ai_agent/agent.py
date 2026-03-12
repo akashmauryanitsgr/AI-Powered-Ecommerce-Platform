@@ -29,6 +29,8 @@ def get_llm():
     Set LLM_PROVIDER to 'gemini', 'groq', or 'openai' in your .env file.
     """
     provider = os.getenv("LLM_PROVIDER", "gemini").lower()
+    if provider == "grok":
+        provider = "groq"
 
     if provider == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
@@ -42,7 +44,7 @@ def get_llm():
         from langchain_openai import ChatOpenAI
         return ChatOpenAI(
             model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
-            openai_api_key=os.getenv("GROQ_API_KEY"),
+            openai_api_key=os.getenv("GROQ_API_KEY") or os.getenv("GROK_API_KEY"),
             openai_api_base="https://api.groq.com/openai/v1",
             temperature=0.3,
         )
