@@ -35,13 +35,14 @@ export default function ProductsPageClient() {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
-
-  const [category, setCategory] = useState(searchParams.get('category') || '')
-  const [sort, setSort] = useState(searchParams.get('sort') || 'newest')
-  const [search, setSearch] = useState(searchParams.get('search') || '')
-  const [minPrice, setMinPrice] = useState(searchParams.get('min_price') ? Number(searchParams.get('min_price')) : undefined)
-  const [maxPrice, setMaxPrice] = useState(searchParams.get('max_price') ? Number(searchParams.get('max_price')) : undefined)
   const [page, setPage] = useState(1)
+
+  const category = searchParams.get('category') || ''
+  const sort = searchParams.get('sort') || 'newest'
+  const search = searchParams.get('search') || ''
+  const minPrice = searchParams.get('min_price') ? Number(searchParams.get('min_price')) : undefined
+  const maxPrice = searchParams.get('max_price') ? Number(searchParams.get('max_price')) : undefined
+  const featured = searchParams.get('featured') === 'true' ? true : undefined
 
   useEffect(() => {
     getCategories().then(setCategories).catch(console.error)
@@ -56,7 +57,7 @@ export default function ProductsPageClient() {
         sort,
         min_price: minPrice,
         max_price: maxPrice,
-        featured: searchParams.get('featured') === 'true' ? true : undefined,
+        featured,
         page,
         page_size: 12,
       })
@@ -67,30 +68,30 @@ export default function ProductsPageClient() {
     } finally {
       setLoading(false)
     }
-  }, [category, sort, search, minPrice, maxPrice, page, searchParams])
+  }, [category, sort, search, minPrice, maxPrice, featured, page])
 
   useEffect(() => {
     loadProducts()
   }, [loadProducts])
 
   useEffect(() => {
-    setCategory(searchParams.get('category') || '')
-    setSort(searchParams.get('sort') || 'newest')
-    setSearch(searchParams.get('search') || '')
-    setMinPrice(searchParams.get('min_price') ? Number(searchParams.get('min_price')) : undefined)
-    setMaxPrice(searchParams.get('max_price') ? Number(searchParams.get('max_price')) : undefined)
     setPage(1)
   }, [searchParams])
 
-  const updateFilter = (key: string, value: string | number | undefined) => {
+  const updateFilters = (updates: Record<string, string | number | undefined>) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) {
-      params.set(key, String(value))
-    } else {
-      params.delete(key)
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === '' || value === undefined) {
+        params.delete(key)
+      } else {
+        params.set(key, String(value))
+      }
     }
+
     params.delete('page')
-    router.push(`/products?${params.toString()}`)
+    const query = params.toString()
+    router.push(query ? `/products?${query}` : '/products')
   }
 
   const clearFilters = () => {
@@ -124,7 +125,7 @@ export default function ProductsPageClient() {
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-ink/50 mb-3">Category</h3>
                 <div className="space-y-1">
                   <button
-                    onClick={() => updateFilter('category', '')}
+                    onClick={() => updateFilters({ category: undefined })}
                     className={cn(
                       'w-full text-left text-sm px-3 py-2 rounded-lg transition-colors',
                       !category ? 'bg-ink text-stone font-medium' : 'text-ink/70 hover:bg-mist'
@@ -135,7 +136,7 @@ export default function ProductsPageClient() {
                   {categories.map(cat => (
                     <button
                       key={cat.slug}
-                      onClick={() => updateFilter('category', cat.slug)}
+                      onClick={() => updateFilters({ category: cat.slug })}
                       className={cn(
                         'w-full text-left text-sm px-3 py-2 rounded-lg transition-colors flex items-center gap-2',
                         category === cat.slug ? 'bg-ink text-stone font-medium' : 'text-ink/70 hover:bg-mist'
@@ -153,8 +154,7 @@ export default function ProductsPageClient() {
                 <div className="space-y-1">
                   <button
                     onClick={() => {
-                      updateFilter('min_price', '')
-                      updateFilter('max_price', '')
+                      updateFilters({ min_price: undefined, max_price: undefined })
                     }}
                     className={cn(
                       'w-full text-left text-sm px-3 py-2 rounded-lg transition-colors',
@@ -166,10 +166,7 @@ export default function ProductsPageClient() {
                   {PRICE_RANGES.map(range => (
                     <button
                       key={range.label}
-                      onClick={() => {
-                        updateFilter('min_price', range.min)
-                        updateFilter('max_price', range.max)
-                      }}
+                      onClick={() => updateFilters({ min_price: range.min, max_price: range.max })}
                       className={cn(
                         'w-full text-left text-sm px-3 py-2 rounded-lg transition-colors',
                         minPrice === range.min && maxPrice === range.max
@@ -210,7 +207,7 @@ export default function ProductsPageClient() {
               <div className="relative">
                 <select
                   value={sort}
-                  onChange={e => updateFilter('sort', e.target.value)}
+                  onChange={e => updateFilters({ sort: e.target.value })}
                   className="appearance-none bg-white border border-mist rounded-full px-4 py-2 pr-8 text-sm font-medium outline-none focus:border-accent cursor-pointer"
                 >
                   {SORT_OPTIONS.map(o => (
@@ -237,7 +234,7 @@ export default function ProductsPageClient() {
                       {[{ name: 'All', slug: '' }, ...categories].map(cat => (
                         <button
                           key={cat.slug}
-                          onClick={() => { updateFilter('category', cat.slug); setShowFilters(false) }}
+                          onClick={() => { updateFilters({ category: cat.slug || undefined }); setShowFilters(false) }}
                           className={cn(
                             'w-full text-left text-sm px-2 py-1.5 rounded-lg transition-colors',
                             category === cat.slug ? 'bg-ink text-stone' : 'text-ink/70 hover:bg-mist'
@@ -256,8 +253,7 @@ export default function ProductsPageClient() {
                         <button
                           key={range.label}
                           onClick={() => {
-                            updateFilter('min_price', range.min)
-                            updateFilter('max_price', range.max)
+                            updateFilters({ min_price: range.min, max_price: range.max })
                             setShowFilters(false)
                           }}
                           className={cn(
