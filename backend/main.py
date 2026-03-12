@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
+import os
 
 from dotenv import load_dotenv
 
@@ -10,6 +11,13 @@ from routers import products, categories, cart, auth, orders, ai_agent
 
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
+
+
+def get_allowed_origins() -> list[str]:
+    cors_origins = os.getenv("CORS_ORIGINS")
+    if cors_origins:
+        return [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+    return ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 
 @asynccontextmanager
@@ -31,7 +39,7 @@ app = FastAPI(
 # Allow frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
