@@ -26,6 +26,7 @@ def row_to_product(row) -> dict:
     }
 
 
+@router.get("", response_model=ProductListResponse, include_in_schema=False)
 @router.get("/", response_model=ProductListResponse)
 def get_products(
     category: Optional[str] = None,

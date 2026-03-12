@@ -5,6 +5,7 @@ from schemas.schemas import CategoryOut
 router = APIRouter()
 
 
+@router.get("", response_model=list[CategoryOut], include_in_schema=False)
 @router.get("/", response_model=list[CategoryOut])
 def get_categories():
     """Get all product categories."""

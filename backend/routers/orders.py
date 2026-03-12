@@ -6,6 +6,7 @@ from schemas.schemas import CreateOrderRequest, OrderOut
 router = APIRouter()
 
 
+@router.post("", response_model=OrderOut, include_in_schema=False)
 @router.post("/", response_model=OrderOut)
 def create_order(data: CreateOrderRequest):
     """Create a new order."""
@@ -36,6 +37,7 @@ def create_order(data: CreateOrderRequest):
     return dict(order)
 
 
+@router.get("", response_model=list[OrderOut], include_in_schema=False)
 @router.get("/", response_model=list[OrderOut])
 def get_orders(user_id: int = None, session_id: str = None):
     """Get all orders for a user."""

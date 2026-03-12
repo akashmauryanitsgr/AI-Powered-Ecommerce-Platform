@@ -19,7 +19,7 @@ export const getProducts = (params?: {
   featured?: boolean
   page?: number
   page_size?: number
-}) => api.get('/products', { params }).then(r => r.data)
+}) => api.get('/products/', { params }).then(r => r.data)
 
 export const getFeaturedProducts = () =>
   api.get('/products/featured').then(r => r.data)
@@ -30,7 +30,7 @@ export const getProduct = (id: number) =>
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 export const getCategories = () =>
-  api.get('/categories').then(r => r.data)
+  api.get('/categories/').then(r => r.data)
 
 export const getCategory = (slug: string) =>
   api.get(`/categories/${slug}`).then(r => r.data)
@@ -38,7 +38,7 @@ export const getCategory = (slug: string) =>
 // ─── Cart ─────────────────────────────────────────────────────────────────────
 
 export const getCart = (sessionId?: string, userId?: number) =>
-  api.get('/cart', { params: { session_id: sessionId, user_id: userId } }).then(r => r.data)
+  api.get('/cart/', { params: { session_id: sessionId, user_id: userId } }).then(r => r.data)
 
 export const addToCart = (data: {
   product_id: number
@@ -67,10 +67,10 @@ export const login = (data: { email: string; password: string }) =>
 // ─── Orders ───────────────────────────────────────────────────────────────────
 
 export const createOrder = (data: any) =>
-  api.post('/orders', data).then(r => r.data)
+  api.post('/orders/', data).then(r => r.data)
 
 export const getOrders = (sessionId?: string, userId?: number) =>
-  api.get('/orders', { params: { session_id: sessionId, user_id: userId } }).then(r => r.data)
+  api.get('/orders/', { params: { session_id: sessionId, user_id: userId } }).then(r => r.data)
 
 // ─── AI Chat ──────────────────────────────────────────────────────────────────
 

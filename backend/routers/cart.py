@@ -26,6 +26,7 @@ def get_cart_items(cursor, user_id=None, session_id=None):
     return cursor.fetchall()
 
 
+@router.get("", response_model=CartOut, include_in_schema=False)
 @router.get("/", response_model=CartOut)
 def get_cart(user_id: int = None, session_id: str = None):
     """Get current cart contents."""
